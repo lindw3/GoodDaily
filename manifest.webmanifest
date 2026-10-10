@@ -1,0 +1,13 @@
+{
+  "name": "GoodDaily",
+  "short_name": "GoodDaily",
+  "description": "A gentle daily checklist for your well-being.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f9fd",
+  "theme_color": "#06295e",
+  "icons": [
+    { "src": "gooddaily_logo.png", "sizes": "any", "type": "image/png", "purpose": "any" },
+    { "src": "gooddaily_logo.png", "sizes": "any", "type": "image/png", "purpose": "maskable" }
+  ]
+}
