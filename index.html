@@ -24,7 +24,7 @@
         <div class="hero">
           <p class="eyebrow" id="todayDate"></p>
           <h1 id="todayTitle">Make today a good day.</h1>
-          <p class="hero-copy">Small moments of care add up. What will you make space for today?</p>
+          <p class="hero-copy">How will you increase your well-being today?</p>
           <div class="progress-card">
             <div class="progress-copy"><strong id="progressCount">0 of 5</strong><span>areas complete</span></div>
             <div class="progress-track" aria-hidden="true"><span id="progressFill"></span></div>
@@ -32,15 +32,15 @@
         </div>
         <div class="area-list" id="areaList" aria-live="polite"></div>
         <div class="completion-message" id="completionMessage" hidden>
-          <span>✦</span><div><strong>Beautiful work.</strong><p>You have cared for every active area today.</p></div>
+          <span>✦</span><div><strong>A day well spent.</strong><p>You have tended to every area today.</p></div>
         </div>
       </section>
 
       <section class="screen" id="historyScreen" aria-labelledby="historyTitle">
         <div class="page-heading">
-          <p class="eyebrow">Your rhythm</p>
+          <p class="eyebrow">What you've accomplished</p>
           <h1 id="historyTitle">History</h1>
-          <p>Look back on the moments you made count.</p>
+          <p>Look back on how you made every day count.</p>
         </div>
         <div class="filter-row" aria-label="History period">
           <label>Month<select id="monthSelect"></select></label>
@@ -51,16 +51,17 @@
           <div class="summary-list" id="summaryList"></div>
         </section>
         <section class="history-section notes-section" aria-labelledby="notesTitle">
-          <div class="section-heading"><h2 id="notesTitle">Notes from your days</h2></div>
+          <div class="section-heading"><h2 id="notesTitle">Your notes</h2></div>
           <div id="notesList"></div>
         </section>
       </section>
 
       <section class="screen" id="howtoScreen" aria-labelledby="howtoTitle">
         <div class="page-heading">
-          <p class="eyebrow">Gentle ideas</p>
+          <p class="eyebrow">Some inspiration</p>
           <h1 id="howtoTitle">How-To</h1>
-          <p>There is no perfect way to care for yourself. Start with one small thing.</p>
+          <p>Life is built through your habits. Small steps taken consistently lead to meaningful change over time.</p>
+          <p>Here are some tips on how to start.</p>
         </div>
         <div class="inspiration-list" id="inspirationList"></div>
       </section>
@@ -76,12 +77,22 @@
       <form method="dialog" class="modal-content" id="noteForm">
         <button class="modal-close" value="cancel" aria-label="Close">×</button>
         <div class="modal-symbol" id="modalSymbol"></div>
-        <p class="eyebrow">A moment for you</p>
+        <p class="eyebrow">Another step taken</p>
         <h2 id="noteTitle">Physical well-being</h2>
-        <p class="modal-text">Would you like to remember what you did?</p>
+        <p class="modal-text">Would you like to elaborate?</p>
         <label class="note-label" for="noteInput">Optional note</label>
-        <textarea id="noteInput" maxlength="500" placeholder="e.g. An energising walk by the water"></textarea>
-        <div class="modal-actions"><button class="button secondary" value="cancel">Not now</button><button class="button primary" id="completeButton" value="default">Complete area</button></div>
+        <textarea id="noteInput" maxlength="500" placeholder="Add text here"></textarea>
+        <div class="modal-actions"><button class="button secondary" value="cancel">Not now</button><button class="button primary" id="completeButton" value="default">Done</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="installDialog" aria-labelledby="installTitle">
+      <form method="dialog" class="modal-content install-content">
+        <div class="modal-symbol install-symbol">⌂</div>
+        <p class="eyebrow">Made for your home screen</p>
+        <h2 id="installTitle">Keep GoodDaily close</h2>
+        <p class="modal-text">For the best experience, add GoodDaily to your phone's home screen. In your browser menu, choose <strong>Add to Home Screen</strong> or <strong>Install app</strong>.</p>
+        <button class="button primary full-width" value="close">Got it</button>
       </form>
     </dialog>
 
@@ -90,7 +101,7 @@
         <button class="modal-close" value="close" aria-label="Close">×</button>
         <p class="eyebrow">Your checklist</p>
         <h2 id="settingsTitle">Daily areas</h2>
-        <p class="modal-text">Choose the areas you want to see each day. You can change this whenever you need to.</p>
+        <p class="modal-text">Choose the areas you want to see each day.</p>
         <div id="areaToggles" class="area-toggles"></div>
         <button class="button primary full-width" value="close">Done</button>
       </form>

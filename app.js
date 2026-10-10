@@ -1,14 +1,15 @@
 const AREAS = [
-  { id: 'physical', name: 'Physical well-being', icon: '◒', color: '#2675e8', ideas: ['Gym training', 'Going for a run or walk', 'Playing a sport', 'Taking an activity break during work or studying', 'Taking the stairs instead of the elevator'] },
+  { id: 'physical', name: 'Physical well-being', icon: '◒', color: '#2675e8', ideas: ['Go to the gym', 'Go for a run or walk', 'Play a sport', 'Take an activity break during work or studying', 'Take the stairs instead of the elevator'] },
   { id: 'spiritual', name: 'Spiritual well-being', icon: '✧', color: '#42ae54', ideas: ['Think of a quote that moves you', 'Think of a word that inspires you', 'Reflect on what gives your life a sense of meaning', 'Pray', 'Reflect on the kind of person you aspire to be'] },
-  { id: 'intellectual', name: 'Intellectual well-being', icon: '◈', color: '#f4b62b', ideas: ['Read something nourishing', 'Write', 'Think deeply', 'Listen to or watch intellectually stimulating content'] },
-  { id: 'relational', name: 'Relational well-being', icon: '♡', color: '#ff7155', ideas: ['Be kind', 'Be generous', 'Give a compliment', 'Reach out to show your appreciation'] },
+  { id: 'intellectual', name: 'Intellectual well-being', icon: '◈', color: '#f4b62b', ideas: ['Read something nourishing', 'Write about an interesting subject', 'Think deeply', 'Listen to or watch intellectually stimulating content'] },
+  { id: 'relational', name: 'Relational well-being', icon: '♡', color: '#ff7155', ideas: ['Be kind to someone', 'Make a generous gesture', 'Give a compliment', 'Reach out to a friend to show your appreciation'] },
   { id: 'emotional', name: 'Emotional well-being', icon: '☼', color: '#7766c9', ideas: ['Observe your emotions without judging them', 'Focus on what you are grateful for', 'Take time to appreciate what is good in your life', 'Do something that you enjoy'] }
 ];
 
 const KEY = 'gooddaily-data-v1';
 let data = loadData();
 let activeArea = null;
+let editingCompletion = null;
 const $ = (selector) => document.querySelector(selector);
 
 function loadData() {
@@ -33,32 +34,42 @@ function renderToday() {
   const todays = currentDayCompletions();
   const active = AREAS.filter(isActive);
   const completed = new Set(todays.map(item => item.areaId));
-  $('#progressCount').textContent = `${completed.size} of ${active.length}`;
-  $('#progressFill').style.width = `${active.length ? (completed.size / active.length) * 100 : 0}%`;
+  const completedActive = active.filter(area => completed.has(area.id));
+  $('#progressCount').textContent = `${completedActive.length} of ${active.length}`;
+  $('#progressFill').style.width = `${active.length ? (completedActive.length / active.length) * 100 : 0}%`;
   $('#areaList').innerHTML = active.length ? active.map(area => {
     const done = completed.has(area.id);
     const completion = todays.find(item => item.areaId === area.id);
-    return `<button class="area-card ${done ? 'done' : ''}" style="--area:${area.color}" data-area="${area.id}" ${done ? 'aria-pressed="true"' : 'aria-pressed="false"'}>
-      <span class="area-marker">${area.icon}</span><span class="area-card-copy"><span class="area-card-title">${area.name}</span><span class="area-card-sub">${done ? (completion.note ? 'Completed · note added' : 'Completed today') : 'Tap to mark your moment'}</span></span><span class="check">✓</span>
-    </button>`;
+    return `<article class="area-card ${done ? 'done' : ''}" style="--area:${area.color}">
+      <button class="area-open" data-note-area="${area.id}" aria-label="${done ? `Add or edit a note for ${area.name}` : `Complete ${area.name} with an optional note`}"><span class="area-marker">${area.icon}</span><span class="area-card-copy"><span class="area-card-title">${area.name}</span><span class="area-card-sub">${done ? (completion.note ? 'Completed · note added' : 'Completed today') : 'Add a note or tap the check'}</span></span></button>
+      <button class="check" data-quick-area="${area.id}" aria-label="${done ? `Uncheck ${area.name}` : `Quickly complete ${area.name}`}" aria-pressed="${done}">✓</button>
+    </article>`;
   }).join('') : '<div class="empty-state">Your daily checklist is empty. Use the settings button above to bring an area back when you are ready.</div>';
   const message = $('#completionMessage');
-  message.hidden = !(active.length && completed.size === active.length);
-  document.querySelectorAll('.area-card').forEach(button => button.addEventListener('click', () => handleArea(button.dataset.area)));
+  message.hidden = !(active.length && completedActive.length === active.length);
+  document.querySelectorAll('[data-note-area]').forEach(button => button.addEventListener('click', () => openNoteDialog(button.dataset.noteArea)));
+  document.querySelectorAll('[data-quick-area]').forEach(button => button.addEventListener('click', () => quickComplete(button.dataset.quickArea)));
 }
 
-function handleArea(areaId) {
+function quickComplete(areaId) {
   const existing = currentDayCompletions().find(item => item.areaId === areaId);
   if (existing) {
     data.completions = data.completions.filter(item => item !== existing);
     saveData(); renderToday(); renderHistory();
     return;
   }
+  data.completions.push({ id: crypto.randomUUID?.() || String(Date.now()), areaId, date: localDate(), timestamp: new Date().toISOString(), note: '' });
+  saveData(); renderToday(); renderHistory();
+}
+
+function openNoteDialog(areaId) {
+  editingCompletion = currentDayCompletions().find(item => item.areaId === areaId) || null;
   activeArea = AREAS.find(area => area.id === areaId);
   $('#modalSymbol').textContent = activeArea.icon;
   $('#modalSymbol').style.background = activeArea.color;
   $('#noteTitle').textContent = activeArea.name;
-  $('#noteInput').value = '';
+  $('#noteInput').value = editingCompletion?.note || '';
+  $('#completeButton').textContent = editingCompletion ? 'Save note' : 'Complete area';
   $('#noteDialog').showModal();
   setTimeout(() => $('#noteInput').focus(), 60);
 }
@@ -66,7 +77,8 @@ function handleArea(areaId) {
 $('#noteForm').addEventListener('submit', (event) => {
   if (event.submitter?.id !== 'completeButton' || !activeArea) return;
   event.preventDefault();
-  data.completions.push({ id: crypto.randomUUID?.() || String(Date.now()), areaId: activeArea.id, date: localDate(), timestamp: new Date().toISOString(), note: $('#noteInput').value.trim() });
+  if (editingCompletion) editingCompletion.note = $('#noteInput').value.trim();
+  else data.completions.push({ id: crypto.randomUUID?.() || String(Date.now()), areaId: activeArea.id, date: localDate(), timestamp: new Date().toISOString(), note: $('#noteInput').value.trim() });
   saveData(); $('#noteDialog').close(); renderToday(); renderHistory();
 });
 
@@ -102,4 +114,10 @@ $('#monthSelect').addEventListener('change', renderHistory); $('#yearSelect').ad
 $('#settingsButton').addEventListener('click', () => { renderSettings(); $('#settingsDialog').showModal(); });
 
 renderToday(); renderInspiration(); populateFilters(); renderHistory();
+const isPhone = window.matchMedia('(max-width: 600px), (pointer: coarse)').matches;
+const isInstalled = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+if (isPhone && !isInstalled && !sessionStorage.getItem('gooddaily-install-tip-seen')) {
+  $('#installDialog').showModal();
+  sessionStorage.setItem('gooddaily-install-tip-seen', 'true');
+}
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
